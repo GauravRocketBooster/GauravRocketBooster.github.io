@@ -200,6 +200,13 @@ tags: [{', '.join(tags)}]
             print("No recent notes found to publish")
             return
         
+        # Add debug logging
+        print(f"Found {len(notes)} notes to process")
+        for note in notes:
+            print(f"Note title: {note.get('title')}")
+            print(f"Note content length: {len(note.get('content', ''))}")
+            print(f"Note images: {len(note.get('images', []))}")
+        
         published_files = []
         for note in notes:
             if not note.get('title') or not note.get('content'):
@@ -207,6 +214,8 @@ tags: [{', '.join(tags)}]
             
             filename = self.create_markdown_post(note)
             published_files.append(filename)
+            # Add debug logging
+            print(f"Created file: {filename}")
         
         if published_files:
             print("\nCommitting changes to GitHub...")
