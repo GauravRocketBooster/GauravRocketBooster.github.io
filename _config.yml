@@ -24,3 +24,8 @@ defaults:
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+
+permalink: /:year/:month/:day/:title/
+
+# If you're using GitHub Pages, add:
+github: [metadata]

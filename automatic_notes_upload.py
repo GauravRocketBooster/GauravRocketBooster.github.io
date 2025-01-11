@@ -28,17 +28,22 @@ class NotesPublisher:
             
             repeat with theNote in selectedNotes
                 try
-                    set noteData to {|title|:name of theNote, content:body of theNote, images:{}}
+                    set noteContent to body of theNote
+                    set noteImages to {}
                     
-                    -- Add attachments if they exist
-                    try
-                        repeat with theAttachment in attachments of theNote
-                            if path of theAttachment is not missing value then
-                                set end of images of noteData to path of theAttachment
+                    -- Get attachments
+                    repeat with theAttachment in attachments of theNote
+                        try
+                            if theAttachment's type identifier starts with "public.image" then
+                                set imageFile to path of theAttachment
+                                if imageFile is not missing value then
+                                    set end of noteImages to imageFile
+                                end if
                             end if
-                        end repeat
-                    end try
+                        end try
+                    end repeat
                     
+                    set noteData to {|title|:name of theNote, content:noteContent, images:noteImages}
                     copy noteData to end of noteList
                 end try
             end repeat
@@ -104,6 +109,7 @@ class NotesPublisher:
         """Copy image to assets directory and return new path"""
         try:
             if not image_path or not os.path.exists(image_path):
+                print(f"Image path does not exist: {image_path}")
                 return None
                 
             # Generate unique filename based on content
@@ -115,10 +121,15 @@ class NotesPublisher:
             new_filename = f"{file_hash}{extension}"
             new_path = self.assets_dir / new_filename
             
-            # Copy file
-            if not new_path.exists():
-                subprocess.run(['cp', image_path, str(new_path)])
+            # Copy file with debug output
+            print(f"Copying image from {image_path} to {new_path}")
+            subprocess.run(['cp', image_path, str(new_path)], check=True)
             
+            if not new_path.exists():
+                print(f"Failed to copy image to {new_path}")
+                return None
+            
+            print(f"Successfully copied image to {new_path}")
             return f"/assets/images/{new_filename}"
         except Exception as e:
             print(f"Error processing image {image_path}: {str(e)}")

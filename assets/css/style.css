@@ -1,0 +1,27 @@
+.note-card {
+    margin-bottom: 2em;
+    padding: 1em;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+.note-title {
+    font-size: 1.5em;
+    color: #333;
+    text-decoration: none;
+}
+
+.note-meta {
+    color: #666;
+    font-size: 0.9em;
+    margin: 0.5em 0;
+}
+
+.tag {
+    background: #f0f0f0;
+    padding: 0.2em 0.5em;
+    border-radius: 3px;
+    margin-right: 0.5em;
+    color: #666;
+    text-decoration: none;
+} 
