@@ -1,33 +1,183 @@
-{% include header.html %}
+<!-- _layouts/default.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site.title }}</title>
+    <style>
+        /* Dark mode variables */
+        :root {
+            --bg-primary: #1c1c1e;
+            --bg-secondary: #2c2c2e;
+            --text-primary: #ffffff;
+            --text-secondary: #86868b;
+            --accent: #0a84ff;
+            --border: #3a3a3c;
+            --hover: #3a3a3c;
+        }
 
-{% if site.layout == 'stacked' %}
-  <div class="container-lg py-6 p-responsive text-center">
-    {% include masthead.html metadata=false %}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <div class="container-md f4 text-left border rounded-2 bg-white p-3 p-sm-5 mt-6">
-      <p class="f5"><a href="/" class="d-flex flex-items-center">{% octicon chevron-left height:16 class:"mr-2 v-align-middle" fill:#0366d6 aria-label:Home %}Home</a></p>
-      <h1 class="f00-light lh-condensed mb-5">{{ page.title }}</h1>
-      {{ content }}
-    </div>
-  </div>
-{% else %}
-  <div class="d-md-flex min-height-full {% unless site.style == 'dark' %}border-md-bottom{% endunless %}">
-    <div class="flex-self-stretch {% if site.style == 'dark' %}bg-gray-dark{% else %}border-md-right border-gray-light bg-white{% endif %} col-md-5 col-lg-4 col-xl-3 px-4 px-md-6 px-lg-7 py-6">
-      {% include masthead.html metadata=true %}
-    </div>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
 
-    <div class="col-md-7 col-lg-8 col-xl-9 px-4 py-6 px-lg-7 border-top border-md-top-0 bg-gray-light" {% if site.style == 'dark' %}style="background-color: #2f363d !important"{% endif %}>
-      <div class="mx-auto" style="max-width: 900px;">
-        <div class="f4 {% if site.style == 'dark' %}text-white{% endif %} mb-6">
-          <div class="f4 {% if site.style == 'dark' %}text-white{% endif %}">
-            <p class="f5"><a href="{{ site.url }}{{ site.baseurl | append:'/' }}" class="d-flex flex-items-center {% if site.style == 'dark' %}text-white{% endif %}">{% octicon chevron-left height:16 class:"mr-2 v-align-middle" fill:{{ icon_color }} aria-label:Home %}Home</a></p>
-            <h1 class="f00-light lh-condensed mb-5">{{ page.title }}</h1>
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .sidebar-header {
+            margin-bottom: 2rem;
+        }
+
+        .tags-list {
+            list-style: none;
+        }
+
+        .tag-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .tag-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .tag-link:hover {
+            background: var(--hover);
+        }
+
+        .tag-count {
+            margin-left: auto;
+            background: var(--border);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Main content styles */
+        .main-content {
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .note-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .note-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .note-meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .note-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            background: var(--accent);
+            color: var(--text-primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        /* Search bar */
+        .search-bar {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>{{ site.title }}</h1>
+            </div>
+            <input type="text" class="search-bar" placeholder="Search notes..." id="searchBar">
+            <div class="tags-list">
+                {% assign tags = site.posts | map: "tags" | uniq | sort %}
+                {% for tag in tags %}
+                    {% assign tag_count = site.posts | where_exp: "post", "post.tags contains tag" | size %}
+                    <div class="tag-item">
+                        <a href="/tags/{{ tag }}" class="tag-link">
+                            #{{ tag }}
+                            <span class="tag-count">{{ tag_count }}</span>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </aside>
+        
+        <main class="main-content">
             {{ content }}
-          </div>
-        </div>
-      </div>
+        </main>
     </div>
-  </div>
-{% endif %}
 
-{% include footer.html %}
+    <script>
+        // Simple search functionality
+        const searchBar = document.getElementById('searchBar');
+        const noteCards = document.querySelectorAll('.note-card');
+
+        searchBar.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            noteCards.forEach(card => {
+                const title = card.querySelector('.note-title').textContent.toLowerCase();
+                const content = card.querySelector('.note-excerpt').textContent.toLowerCase();
+                const isVisible = title.includes(searchTerm) || content.includes(searchTerm);
+                card.style.display = isVisible ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
