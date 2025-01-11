@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "51)Backtesting April 7th"
-date: 2025-01-11 14:17:43
+date: 2025-01-11 14:18:37
 categories: notes
 ---
 
