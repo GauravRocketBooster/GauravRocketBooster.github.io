@@ -3,18 +3,19 @@ layout: default
 ---
 <article class="post">
   <h1>{{ page.title }}</h1>
-  <div class="post-meta">
+  <div class="meta">
     {{ page.date | date: "%B %d, %Y" }}
-    {% if page.tags %}
-    <div class="tags">
-      {% for tag in page.tags %}
-        <span class="tag">#{{ tag }}</span>
-      {% endfor %}
-    </div>
-    {% endif %}
   </div>
   
-  <div class="post-content">
+  <div class="content">
     {{ content }}
   </div>
+
+  {% if page.tags %}
+  <div class="tags">
+    {% for tag in page.tags %}
+    <a href="{{ site.baseurl }}/tags/{{ tag }}" class="tag">#{{ tag }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
 </article>

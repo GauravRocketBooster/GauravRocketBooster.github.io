@@ -1,12 +1,12 @@
 # _config.yml
 title: My Notes
-description: Digital Garden
-url: "https://thinkingjet.github.io"
+description: My personal notes and thoughts
 baseurl: ""
+url: "https://thinkingjet.github.io"
 
 # Build settings
 markdown: kramdown
-highlighter: rouge
+permalink: /:title/
 
 # Collections
 collections:
@@ -20,12 +20,12 @@ defaults:
       type: "posts"
     values:
       layout: "post"
-      
+  - scope:
+      path: ""
+      type: "tags"
+    values:
+      layout: "tag"
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
-
-permalink: /:year/:month/:day/:title/
-
-# If you're using GitHub Pages, add:
-github: [metadata]

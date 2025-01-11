@@ -31,17 +31,25 @@ class NotesPublisher:
                     set noteContent to body of theNote
                     set noteImages to {}
                     
-                    -- Get attachments
+                    -- Get attachments with more detailed logging
                     repeat with theAttachment in attachments of theNote
                         try
-                            if theAttachment's type identifier starts with "public.image" then
+                            set attachmentType to type identifier of theAttachment
+                            log "Found attachment of type: " & attachmentType
+                            
+                            if attachmentType starts with "public.image" or attachmentType starts with "com.apple.quicktime-image" then
                                 set imageFile to path of theAttachment
                                 if imageFile is not missing value then
+                                    log "Found image path: " & imageFile
                                     set end of noteImages to imageFile
                                 end if
                             end if
                         end try
                     end repeat
+                    
+                    -- Log the data we're about to return
+                    log "Note title: " & name of theNote
+                    log "Number of images found: " & (count of noteImages)
                     
                     set noteData to {|title|:name of theNote, content:noteContent, images:noteImages}
                     copy noteData to end of noteList
@@ -108,31 +116,62 @@ class NotesPublisher:
     def copy_image_to_assets(self, image_path):
         """Copy image to assets directory and return new path"""
         try:
+            print(f"Attempting to copy image: {image_path}")
+            
+            # Handle potential file:// prefix in image paths
+            if image_path.startswith("file://"):
+                image_path = image_path[7:]
+            
             if not image_path or not os.path.exists(image_path):
                 print(f"Image path does not exist: {image_path}")
                 return None
-                
-            # Generate unique filename based on content
+            
+            # Print file details for debugging
+            file_stat = os.stat(image_path)
+            print(f"File size: {file_stat.st_size} bytes")
+            print(f"File permissions: {oct(file_stat.st_mode)}")
+            
+            # Generate unique filename based on content and timestamp
             with open(image_path, 'rb') as f:
-                file_hash = hashlib.md5(f.read()).hexdigest()[:10]
+                content = f.read()
+                file_hash = hashlib.md5(content + str(time.time()).encode()).hexdigest()[:10]
             
             # Keep original extension or default to .png
-            extension = os.path.splitext(image_path)[1] or '.png'
+            extension = os.path.splitext(image_path)[1].lower() or '.png'
             new_filename = f"{file_hash}{extension}"
             new_path = self.assets_dir / new_filename
             
             # Copy file with debug output
             print(f"Copying image from {image_path} to {new_path}")
-            subprocess.run(['cp', image_path, str(new_path)], check=True)
             
-            if not new_path.exists():
+            # Try both cp command and native Python copy
+            try:
+                subprocess.run(['cp', image_path, str(new_path)], 
+                             check=True, 
+                             capture_output=True, 
+                             text=True)
+            except subprocess.CalledProcessError as e:
+                print(f"cp command failed: {e.stderr}")
+                # Fallback to Python's native file copy
+                import shutil
+                shutil.copy2(image_path, new_path)
+            
+            if new_path.exists():
+                print(f"Successfully copied image to {new_path}")
+                # Verify the copied file
+                if new_path.stat().st_size > 0:
+                    return f"/assets/images/{new_filename}"
+                else:
+                    print("Warning: Copied file is empty")
+                    return None
+            else:
                 print(f"Failed to copy image to {new_path}")
                 return None
             
-            print(f"Successfully copied image to {new_path}")
-            return f"/assets/images/{new_filename}"
         except Exception as e:
             print(f"Error processing image {image_path}: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
             return None
 
     def process_content(self, content, images):

@@ -1,0 +1,20 @@
+---
+layout: default
+---
+<h1>Posts tagged #{{ page.tag }}</h1>
+
+<div class="posts">
+    {% for post in site.posts %}
+        {% if post.tags contains page.tag %}
+        <div class="note-card">
+            <a href="{{ post.url }}" class="note-title">{{ post.title }}</a>
+            <div class="note-meta">
+                {{ post.date | date: "%B %d, %Y" }}
+            </div>
+            <div class="note-excerpt">
+                {{ post.excerpt }}
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div> 
